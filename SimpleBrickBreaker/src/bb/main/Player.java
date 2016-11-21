@@ -6,7 +6,10 @@ public class Player {
 	public static void setLives(int l) {
 		lives = l;
 	}
-
+	public static void loseALife(){
+		lives --;
+		System.out.println("LIFE LOST");
+	}
 	public static int getLives() {
 		return lives;
 	}

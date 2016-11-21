@@ -37,9 +37,7 @@ public abstract class LevelBase {
 		for (int i = 0; i < l.numBrickRows; i++) {
 			for (int j = 0; j < l.numBrickColumns; j++) {
 				BrickBase current = l.brickArray[i][j];
-				System.out.println(i + "  " + j);
 				if (current != null && current.getStrength() >= 0) {
-
 					int x = GameFrame.BRICK_SPACING * (j + 1) + blockWidth * j;
 					int y = GameFrame.BRICK_SPACING_VERT * (i + 1) + (RunGame.gf.getHeight() / 2) / l.numBrickRows
 							+ BLOCK_HEIGHT * i;

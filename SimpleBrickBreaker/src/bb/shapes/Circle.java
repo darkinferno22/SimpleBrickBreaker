@@ -62,7 +62,10 @@ public class Circle extends Shape implements CollisionListener {
 	 * ball hits right side of wall 3 = bottom side of ball hits top side of
 	 * brick 4 = top side of ball hits bottom side of brick
 	 */
-	public static int checkBrickCollision(Circle c, LevelBase l) {
+	public static String checkBrickCollision(Circle c, LevelBase l) {
+
+		String r = "";
+
 		for (BrickBase[] a1 : l.brickArray) {
 
 			for (int i = 0; i < a1.length; i++) {
@@ -71,34 +74,33 @@ public class Circle extends Shape implements CollisionListener {
 				}
 				BrickBase brick = a1[i];
 				Shape.updatePosition(brick);
-				if (c.getCircle().intersects(brick.getRect())) {
+				
+				if (c.getCircle().getBounds().intersects(brick.getRect())) {
 					brick.setStrength(brick.getStrength() - 1);
-					if (DrawFunctions.withinDistance(c.getPosX() + c.getRadius(), brick.getPosX(), c.getDx() * 2)) {
-						return 1;
+					if (DrawFunctions.withinDistance(c.getPosX() + c.getRadius(), brick.getPosX(), 5)) {
+						r += "1";
 					} else if (DrawFunctions.withinDistance(c.getPosX() - c.getRadius(), brick.posX + brick.getWidth(),
-							50)) {
-						return 2;
-					} else if (DrawFunctions.withinDistance(c.getPosY() + c.getRadius(), brick.getPosY(),
-							c.getDy() * 2)) {
-						return 3;
-					} else if (DrawFunctions.withinDistance(c.getPosY() - c.getRadius(),
-							brick.getPosY() + brick.getHeight(), Math.abs(c.getDy()) * 5)) {
-						System.out.println("Bottom hits top");
-						return 4;
+							30)) {
+						r += "2";
 					}
-
-				} else {
-					g2.setColor(Color.ORANGE);
-					DrawFunctions.g2.draw(brick.getRect().getBounds2D());
+					if (DrawFunctions.withinDistance(c.getPosY() + c.getRadius(), brick.getPosY(), 5)) {
+						r += "3";
+					} else if (DrawFunctions.withinDistance(c.getPosY() - c.getRadius(),
+							brick.getPosY() + brick.getHeight(), 30)) {
+						System.out.println("Bottom hits top");
+						r += "4";
+					}
+					System.out.println(r);
 				}
 			}
 		}
-		return 0;
+		return r;
 	}
 
 	@Override
 	public void draw(Color c) {
 		g2.setColor(c);
+		g2.drawOval(this.getPosX(), this.getPosY(), this.getRadius(), this.getRadius());
 		g2.drawImage(DrawFunctions.kappa, this.getPosX(), this.getPosY(), this.getRadius(), this.getRadius(), this);
 
 	}
@@ -106,7 +108,7 @@ public class Circle extends Shape implements CollisionListener {
 	@Override
 	public void clear() {
 		g2.setColor(RunGame.g2.getBackground());
-		g2.fillOval(this.getPosX(), this.getPosY(), this.getRadius(), this.getRadius());
+		g2.fillOval(this.getPosX(), this.getPosY(), this.getRadius()+1, this.getRadius()+1);
 	}
 
 	public static boolean checkCollision(Circle s1, Shape s2) {
@@ -127,44 +129,43 @@ public class Circle extends Shape implements CollisionListener {
 		case 2:
 			System.out.println("Flipped Horizontally");
 			this.setDx(-this.getDx());
-			return;
+			break;
 		case 3:
-			Player.lives--;
+			this.setDy(-this.getDy());
+			Player.loseALife();
 			DrawFunctions.start = true;
 			break;
 		case 4:
 			System.out.println("Flipped vertically");
 			this.setDy(-this.getDy());
-			return;
-		default:
-			return;
-
-		}
-
-		switch (checkBrickCollision(this, DrawFunctions.getCurrentLevel())) {
-		case 0:
 			break;
-		case 1:
-		case 2:
-			System.out.println("Flipped Horizontally");
-			this.setDx(-this.getDx());
-			return;
-		case 3:
-		case 4:
-			System.out.println("Flipped vertically");
-			this.setDy(-this.dy);
-			return;
 		default:
-			return;
+			break;
 
 		}
 
-		// paddle collision
-		int ballPaddleDifference = -((DrawFunctions.paddle.getPosX() + DrawFunctions.paddle.getWidth() / 2)
-				- this.getPosX());
-		this.setDy(-dy);
+		String s = checkBrickCollision(this, DrawFunctions.getCurrentLevel());
+		System.out.println(s);
+		if (s != "") {
 
-		this.setDx(ballPaddleDifference / 8 + DrawFunctions.paddle.getDx()/5);
+			if (s.contains("1") || s.contains("2")) {
+				this.setDx(-this.getDx());
+			}
+			if (s.contains("3") || s.contains("4")) {
+				System.out.println("VErT");
+				this.setDy(-this.getDy());
+			}
+			return;
+		}
+		// paddle collision
+		if (Circle.checkCollision(this, DrawFunctions.paddle)) {
+			int ballPaddleDifference = -((DrawFunctions.paddle.getPosX() + DrawFunctions.paddle.getWidth() / 2)
+					- this.getPosX());
+			this.setDy(-dy);
+
+			this.setDx(ballPaddleDifference / 6 + DrawFunctions.paddle.getDx() / 4);
+			return;
+		}
 
 	}
 }

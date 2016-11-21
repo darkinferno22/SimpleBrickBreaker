@@ -112,20 +112,20 @@ public class DrawFunctions {
 					e.printStackTrace();
 				}
 				start = false;
-				ball1.setDx(random.nextInt(30) - 15);
-				ball1.setDy(-8);
+				ball1.setDx(random.nextInt(20) - 10);
+				ball1.setDy(5);
 			}
+			
 			RunGame.updateG2s();
 
 			ball1.clear();
 			paddle.clear();
-			// System.out.println(new Point(ball1.getPosX(), ball1.getPosY()));
 			Shape.updatePosition(ball1);
 			Shape.updatePosition(paddle);
 			if (Circle.checkWallCollision(ball1) != 0) {
 				Collision.respondToCollision();
 				Shape.updatePosition(ball1);
-			} else if (Circle.checkBrickCollision(ball1, currentLevel) != 0) {
+			} else if (Circle.checkBrickCollision(ball1, currentLevel) != "") {
 				Collision.respondToCollision();
 				LevelBase.renderLevel(currentLevel);
 				Shape.updatePosition(ball1);
@@ -134,6 +134,8 @@ public class DrawFunctions {
 				Collision.respondToCollision();
 				Shape.updatePosition(ball1);
 			}
+			
+			
 			if (Player.getLives() == 0) {
 				Player.setLives(3);
 				drawF = GAME_OVER;
@@ -218,7 +220,7 @@ public class DrawFunctions {
 	}
 
 	public static boolean withinDistance(int a, int b, int distance) {
-		if (Math.abs(a - b) <= distance) {
+		if (Math.abs(a - b) <= Math.abs(distance)) {
 			return true;
 		}
 

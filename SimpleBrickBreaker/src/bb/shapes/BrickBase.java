@@ -45,4 +45,5 @@ public abstract class BrickBase extends Shape {
 	public void setStrength(int strength) {
 		this.strength = strength;
 	}
+	
 }
