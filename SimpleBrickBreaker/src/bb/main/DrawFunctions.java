@@ -5,9 +5,18 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import bb.events.Collision;
+import bb.events.GameOverPanel;
 import bb.events.KeyListenerComponent;
 import bb.levels.LevelBase;
 import bb.levels.LevelLayouts;
@@ -27,13 +36,18 @@ public class DrawFunctions {
 	static GameFrame gf = RunGame.gf;
 	public static Graphics2D g2 = (Graphics2D) bs.getDrawGraphics();
 	static FontMetrics fm;
-	
+
+	public static BufferedImage kappa, failed;
+	public static AudioInputStream missionFailed;
+
 	static KeyListenerComponent listen;
-	
+
 	public static Paddle paddle = new Paddle(10);
 
+	static GameOverPanel gop = new GameOverPanel();
+
 	static Random rand = new Random();
-	
+
 	private static LevelBase currentLevel;
 
 	static Circle ball = new Circle(20, 0, 0, RunGame.gf.getWidth() / 2, RunGame.gf.getHeight() / 2);
@@ -43,12 +57,13 @@ public class DrawFunctions {
 	Circle ball2;
 
 	Circle ball3;
-	static boolean start = true;
-	static int drawF;
+	public static boolean start = true;
+	public static int drawF;
 	static final int TITLE_SCREEN = 0, RENDER_LEVEL = 1, GAME_OVER = 2;
 
 	// Title Screen Drawing
 	public static void titleScreen() {
+		RunGame.gf.remove(gop);
 		fm = g2.getFontMetrics(titleFont);
 		int titleTextWidth = fm.stringWidth(TITLE_TEXT);
 
@@ -79,11 +94,11 @@ public class DrawFunctions {
 			if (start) {
 				RunGame.updateG2s();
 				System.out.println(currentLevel);
+				clearScreen();
 				LevelBase.renderLevel(currentLevel);
-				
+
 				listen = null;
-				
-				
+
 				paddle = null;
 				paddle = new Paddle(20);
 				listen = new KeyListenerComponent(paddle);
@@ -97,40 +112,59 @@ public class DrawFunctions {
 					e.printStackTrace();
 				}
 				start = false;
-				ball1.setDx(random.nextInt(20) - 10);
-				ball1.setDy(-5);
+				ball1.setDx(random.nextInt(30) - 15);
+				ball1.setDy(-8);
 			}
 			RunGame.updateG2s();
-			
+
 			ball1.clear();
 			paddle.clear();
 			// System.out.println(new Point(ball1.getPosX(), ball1.getPosY()));
 			Shape.updatePosition(ball1);
 			Shape.updatePosition(paddle);
 			if (Circle.checkWallCollision(ball1) != 0) {
-				System.out.println("Collision");
 				Collision.respondToCollision();
 				Shape.updatePosition(ball1);
 			} else if (Circle.checkBrickCollision(ball1, currentLevel) != 0) {
-				System.out.println("Brick Collision");
 				Collision.respondToCollision();
 				LevelBase.renderLevel(currentLevel);
 				Shape.updatePosition(ball1);
-				
-			} else if(Circle.checkCollision(ball1, paddle)){
-				System.out.println("Paddle collision");
+
+			} else if (Circle.checkCollision(ball1, paddle)) {
 				Collision.respondToCollision();
 				Shape.updatePosition(ball1);
 			}
-			
-			if(winCheck()){
+			if (Player.getLives() == 0) {
+				Player.setLives(3);
+				drawF = GAME_OVER;
+				RunGame.clip.close();
+				RunGame.gf.add(gop);
+				try {
+					missionFailed = AudioSystem
+							.getAudioInputStream(new File("src/sounds/missionFailed.wav").getAbsoluteFile());
+					RunGame.clip.open(missionFailed);
+				} catch (LineUnavailableException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (UnsupportedAudioFileException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				start = true;
+				int rows = rand.nextInt(3) + 1;
+				int columns = rand.nextInt(7) + 4;
+				currentLevel = null;
+				currentLevel = new RandomLevel(rows, columns, 1.0, LevelLayouts.brickTypes);
+			}
+			if (winCheck()) {
 				int rows = rand.nextInt(3) + 1;
 				int columns = rand.nextInt(9) + 2;
 				start = true;
 				currentLevel = null;
 				currentLevel = new RandomLevel(rows, columns, 1.0, LevelLayouts.brickTypes);
-				//currentLevel = new LevelBase(rows, columns, 70, 50, 1, LevelLayouts.randomLayout(rows, columns, LevelLayouts.brickTypes));
-				System.out.println(currentLevel);
 			}
 
 			do {
@@ -143,24 +177,38 @@ public class DrawFunctions {
 		} while (bs.contentsLost());
 	}
 
+	public static void gameOver() {
+		clearScreen();
+		RunGame.clip.start();
+
+		do {
+			do {
+				g2.drawImage(failed, 0, 0, RunGame.gf.width, RunGame.gf.height, RunGame.gf);
+				g2.setColor(Color.ORANGE);
+				g2.draw(gop.getBounds());
+			} while (bs.contentsRestored());
+			bs.show();
+		} while (bs.contentsLost());
+
+	}
+
 	public static void clearScreen() {
 		RunGame.updateG2s();
 		g2.clearRect(0, 0, RunGame.gf.getWidth(), RunGame.gf.getHeight());
 	}
-	
-	public static boolean winCheck(){
-		for(BrickBase[] a : currentLevel.brickArray){
-			for(BrickBase b : a){
-				if(b != null){
+
+	public static boolean winCheck() {
+		for (BrickBase[] a : currentLevel.brickArray) {
+			for (BrickBase b : a) {
+				if (b != null) {
 					return false;
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
-	
+
 	public static LevelBase getCurrentLevel() {
 		return currentLevel;
 	}
@@ -168,12 +216,12 @@ public class DrawFunctions {
 	public static void setCurrentLevel(LevelBase currentLevel) {
 		DrawFunctions.currentLevel = currentLevel;
 	}
-	
-	public static boolean withinDistance(int a, int b, int distance){
-		if(Math.abs(a-b) <= distance){
+
+	public static boolean withinDistance(int a, int b, int distance) {
+		if (Math.abs(a - b) <= distance) {
 			return true;
 		}
-		
+
 		return false;
 	}
 }

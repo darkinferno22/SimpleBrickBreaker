@@ -2,11 +2,13 @@ package bb.shapes;
 
 import java.awt.Color;
 import java.awt.geom.Ellipse2D;
+import java.awt.image.ImageObserver;
 
 import bb.events.Collision;
 import bb.events.CollisionListener;
 import bb.levels.LevelBase;
 import bb.main.DrawFunctions;
+import bb.main.Player;
 import bb.main.RunGame;
 
 public class Circle extends Shape implements CollisionListener {
@@ -97,7 +99,7 @@ public class Circle extends Shape implements CollisionListener {
 	@Override
 	public void draw(Color c) {
 		g2.setColor(c);
-		g2.fillOval(this.getPosX(), this.getPosY(), this.getRadius(), this.getRadius());
+		g2.drawImage(DrawFunctions.kappa, this.getPosX(), this.getPosY(), this.getRadius(), this.getRadius(), this);
 
 	}
 
@@ -127,6 +129,9 @@ public class Circle extends Shape implements CollisionListener {
 			this.setDx(-this.getDx());
 			return;
 		case 3:
+			Player.lives--;
+			DrawFunctions.start = true;
+			break;
 		case 4:
 			System.out.println("Flipped vertically");
 			this.setDy(-this.getDy());

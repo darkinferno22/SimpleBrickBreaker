@@ -3,12 +3,16 @@ package bb.main;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
+import java.io.File;
+
+import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 import bb.events.KeyListenerComponent;
 import bb.levels.LevelBase;
 import bb.levels.LevelLayouts;
 import bb.levels.NormalLevel;
-import bb.levels.OneBrickLevel;
 import bb.shapes.Shape;
 
 public class RunGame {
@@ -20,36 +24,45 @@ public class RunGame {
 	public static StartGamePanel startPanel;
 	public static int frame = 0;
 	static LevelBase n;
-	
+	public static Clip clip;
+
 	public static void setup() {
-		
+
 		gf = new GameFrame(800, 1280, "BrickBreaker");
-		
+
 		gf.setVisible(true);
 		gf.createBufferStrategy(2);
 		bs = gf.getBufferStrategy();
 		g2 = (Graphics2D) bs.getDrawGraphics();
-		
+
 		startPanel = new StartGamePanel();
 		gf.add(startPanel);
-		
-		
+
 		LevelLayouts.init();
-		n = new OneBrickLevel();
-		
+		n = new NormalLevel();
+
 		DrawFunctions.setCurrentLevel(n);
 		updateG2s();
-		
+
 		DrawFunctions.listen = new KeyListenerComponent(DrawFunctions.paddle);
 		gf.addKeyListener(DrawFunctions.listen);
 		DrawFunctions.drawF = 0;
+		try {
+			clip = AudioSystem.getClip();
+			DrawFunctions.kappa = ImageIO.read(new File("src/images/kappa.png"));
+			DrawFunctions.failed = ImageIO.read(new File("src/images/rip.jpg"));
+			DrawFunctions.missionFailed = AudioSystem.getAudioInputStream(new File("src/sounds/missionFailed.wav").getAbsoluteFile());
+			clip.open(DrawFunctions.missionFailed);
+		} catch (Exception e) {
+
+		}
 	}
-	
-	public static void g2Setup(){
+
+	public static void g2Setup() {
 		g2.setBackground(Color.DARK_GRAY);
 	}
-	
-	public static void updateG2s(){
+
+	public static void updateG2s() {
 		g2 = (Graphics2D) bs.getDrawGraphics();
 		g2Setup();
 		DrawFunctions.g2 = g2;
@@ -72,6 +85,7 @@ public class RunGame {
 				DrawFunctions.renderLevel(n);
 				break;
 			case DrawFunctions.GAME_OVER:
+				DrawFunctions.gameOver();
 				break;
 			default:
 				DrawFunctions.titleScreen();

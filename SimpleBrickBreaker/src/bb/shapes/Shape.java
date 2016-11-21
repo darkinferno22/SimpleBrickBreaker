@@ -6,9 +6,11 @@ import java.awt.Point;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
+import javax.swing.JComponent;
+
 import bb.main.RunGame;
 
-public class Shape {
+public class Shape extends JComponent{
 	public static Graphics2D g2 = RunGame.g2;
 	int height, width, dx, dy, posX, posY;
 	protected int radius;
