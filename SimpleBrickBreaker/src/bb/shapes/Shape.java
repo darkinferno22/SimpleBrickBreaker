@@ -5,9 +5,14 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 
+import bb.events.PowerUp;
 import bb.main.RunGame;
 
 public class Shape extends JComponent{
@@ -50,7 +55,8 @@ public class Shape extends JComponent{
 		rect = new Rectangle2D.Double(this.posX, this.posY, this.width, this.height);
 
 	}
-
+	
+	
 	/*
 	 * 
 	 * @param 1 for topLeft, 2 for topRight, 3 for bottomLeft, 4 for bottomRight

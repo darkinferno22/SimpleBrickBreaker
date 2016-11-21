@@ -25,6 +25,7 @@ public class RunGame {
 	public static int frame = 0;
 	static LevelBase n;
 	public static Clip clip;
+	public static boolean bigBall;
 
 	public static void setup() {
 
@@ -47,6 +48,9 @@ public class RunGame {
 		DrawFunctions.listen = new KeyListenerComponent(DrawFunctions.paddle);
 		gf.addKeyListener(DrawFunctions.listen);
 		DrawFunctions.drawF = 0;
+		
+		bigBall = false;
+		
 		try {
 			clip = AudioSystem.getClip();
 			DrawFunctions.kappa = ImageIO.read(new File("src/images/kappa.png"));

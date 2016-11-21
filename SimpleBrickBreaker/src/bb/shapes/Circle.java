@@ -2,7 +2,7 @@ package bb.shapes;
 
 import java.awt.Color;
 import java.awt.geom.Ellipse2D;
-import java.awt.image.ImageObserver;
+import java.util.Random;
 
 import bb.events.Collision;
 import bb.events.CollisionListener;
@@ -10,11 +10,12 @@ import bb.levels.LevelBase;
 import bb.main.DrawFunctions;
 import bb.main.Player;
 import bb.main.RunGame;
+import bb.shapes.powerups.BigBalls;
 
 public class Circle extends Shape implements CollisionListener {
 
 	public boolean inPlay = true;
-
+	static Random random = new Random();
 	// Clone constructor
 	public Circle(Circle c, int posX, int posY) {
 		super(c, posX, posY);
@@ -76,6 +77,9 @@ public class Circle extends Shape implements CollisionListener {
 				Shape.updatePosition(brick);
 				
 				if (c.getCircle().getBounds().intersects(brick.getRect())) {
+					if(random.nextInt(2) == 0){
+						DrawFunctions.powerUpList.add(new BigBalls(brick.getPosX(), brick.getPosY()));
+					}
 					brick.setStrength(brick.getStrength() - 1);
 					if (DrawFunctions.withinDistance(c.getPosX() + c.getRadius(), brick.getPosX(), 5)) {
 						r += "1";

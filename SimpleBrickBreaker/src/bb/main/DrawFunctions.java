@@ -8,6 +8,8 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.sound.sampled.AudioInputStream;
@@ -18,6 +20,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import bb.events.Collision;
 import bb.events.GameOverPanel;
 import bb.events.KeyListenerComponent;
+import bb.events.PowerUp;
+import bb.events.PowerUpListener;
 import bb.levels.LevelBase;
 import bb.levels.LevelLayouts;
 import bb.levels.RandomLevel;
@@ -25,6 +29,7 @@ import bb.shapes.BrickBase;
 import bb.shapes.Circle;
 import bb.shapes.Paddle;
 import bb.shapes.Shape;
+import bb.shapes.powerups.PowerUpBase;
 
 public class DrawFunctions {
 
@@ -48,15 +53,16 @@ public class DrawFunctions {
 
 	static Random rand = new Random();
 
+	public static List<PowerUpBase> powerUpList = new ArrayList<PowerUpBase>();
+	
 	private static LevelBase currentLevel;
 
 	static Circle ball = new Circle(20, 0, 0, RunGame.gf.getWidth() / 2, RunGame.gf.getHeight() / 2);
 
-	static Circle ball1;
-
-	Circle ball2;
-
-	Circle ball3;
+	static Circle ball1, ball2, ball3;
+	
+	public static List<Circle> ballsInPlay = new ArrayList<Circle>();
+	
 	public static boolean start = true;
 	public static int drawF;
 	static final int TITLE_SCREEN = 0, RENDER_LEVEL = 1, GAME_OVER = 2;
@@ -105,6 +111,7 @@ public class DrawFunctions {
 				RunGame.gf.addKeyListener(listen);
 				ball1 = new Circle(ball, RunGame.gf.getWidth() / 2, RunGame.gf.getWidth() / 2);
 				ball1.draw(Color.red);
+				ballsInPlay.add(ball1);
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
@@ -115,7 +122,7 @@ public class DrawFunctions {
 				ball1.setDx(random.nextInt(20) - 10);
 				ball1.setDy(5);
 			}
-			
+
 			RunGame.updateG2s();
 
 			ball1.clear();
@@ -133,6 +140,20 @@ public class DrawFunctions {
 			} else if (Circle.checkCollision(ball1, paddle)) {
 				Collision.respondToCollision();
 				Shape.updatePosition(ball1);
+			}
+			
+			for(PowerUpBase p : powerUpList){
+				p.clear();
+				if(p.getBounds().getMaxY() >= RunGame.gf.height || p.isActivated()){
+					//powerUpList.remove(p);
+				} else{
+					p.updatePosition();
+					p.draw();
+				}
+				if(p.getBounds().intersects(paddle.getRect())){
+					PowerUp.powerUpPaddle();
+				}
+				
 			}
 			
 			
